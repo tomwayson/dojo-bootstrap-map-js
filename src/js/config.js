@@ -1,5 +1,9 @@
 define([],function() {
 	return {
+    portal: {
+      url: 'http://www.arcgis.com/sharing',
+      itemId: 'de6f6443d71a4321b8c7894ce47fe3c1'
+    },
     map: {
       options: {
         basemap: 'gray',

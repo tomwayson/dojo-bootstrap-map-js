@@ -1,6 +1,7 @@
 define([
   'dojo/_base/declare',
   'dojo/_base/array',
+  'dojo/on',
 
   'dijit/_WidgetBase',
   'dijit/_TemplatedMixin',
@@ -14,7 +15,7 @@ define([
   'components/bootstrapmap/bootstrapmap',
 
   'dojo/text!./templates/Map.html'
-], function(declare, array,
+], function(declare, array, on,
   _WidgetBase, _TemplatedMixin,
   Map, Scalebar, WebTiledLayer, LocateButton, Geocoder,
   BootstrapMap,
@@ -28,7 +29,42 @@ define([
     },
 
     _initMap: function() {
-      this.map = BootstrapMap.create(this.mapNode, this.config.map.options);
+      var _this = this;
+      var webmap = this.config.portal.itemId;
+      if (webmap) {
+        // TODO: use map options from config
+        // TODO: loading...
+        BootstrapMap.createWebMap(webmap, this.mapNode, {
+          slider: true,
+          nav:false,
+          smartNavigation:false
+        }).then(function(response) {
+          _this.map = response.map;
+
+          // TODO: get other map info
+          // Add titles
+          // dom.byId('mapTitle').innerHTML = response.itemInfo.item.title;
+          // //dom.byId('mapSubTitle').innerHTML = response.itemInfo.item.snippet;
+          // // Add scalebar and legend
+          // var layers = esri.arcgis.utils.getLegendLayers(response);
+          if(_this.map.loaded){
+            _this._initMapControls();
+          } else {
+            on(_this.map,'load',function(){
+              _this._initMapControls();
+            });
+          }
+      },function(error){
+        alert('Sorry, could not load webmap!');
+        console.log('Error loading webmap: ' + JSON.stringify(error));
+      });
+      } else {
+        this.map = BootstrapMap.create(this.mapNode, this.config.map.options);
+        this._initMapControls();
+      }
+    },
+
+    _initMapControls: function() {
       this.scalebar = new Scalebar({
         map: this.map,
         scalebarUnit: 'dual'
@@ -47,6 +83,7 @@ define([
 
     clearBaseMap: function(){
       var map = this.map;
+      console.log('getBasemap(): ' + map.getBasemap() + ', basemapLayerIds: ' +  map.basemapLayerIds);
       if(map.basemapLayerIds.length > 0){
         array.forEach(map.basemapLayerIds, function(lid){
           map.removeLayer(map.getLayer(lid));
