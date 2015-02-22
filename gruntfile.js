@@ -162,7 +162,7 @@ module.exports = function(grunt) {
       options: {
         base: 'src'
       },
-      src: ['app/**', 'index.html']
+      src: ['app/**', 'index.html', 'dashboard/**', 'dashboard.html']
     }
   });
   grunt.loadNpmTasks('grunt-contrib-jshint');
